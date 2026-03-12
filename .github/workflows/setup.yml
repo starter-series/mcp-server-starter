@@ -1,0 +1,58 @@
+name: Template Setup
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  setup:
+    if: github.run_number == 1
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check if template
+        id: check
+        run: |
+          NAME=$(node -e "console.log(require('./package.json').name)")
+          if [ "$NAME" = "my-mcp-server" ]; then
+            echo "is_template=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "is_template=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create setup checklist
+        if: steps.check.outputs.is_template == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh issue create \
+            --title "Setup: Configure your MCP server" \
+            --body "$(cat <<'EOF'
+          Welcome! You've created a new project from **mcp-server-starter**.
+
+          ## Required
+          - [ ] Update `package.json` — change `name`, `description`, `bin` key
+          - [ ] Update server name and version in `src/index.ts`
+          - [ ] Replace the example `greet` tool with your own tools in `src/tools/`
+          - [ ] Update tests in `tests/`
+
+          ## npm Publishing (OIDC — no tokens needed)
+          Follow [docs/NPM_PUBLISH_SETUP.md](docs/NPM_PUBLISH_SETUP.md) to:
+          - [ ] Create an npm account at [npmjs.com](https://www.npmjs.com)
+          - [ ] Configure OIDC trusted publishing
+          - [ ] Create GitHub Environment named `npm`
+
+          ## Testing Locally
+          - [ ] Build: `npm run build`
+          - [ ] Test with MCP Inspector: `npx @modelcontextprotocol/inspector node dist/index.js`
+          - [ ] Add to Claude Desktop config (see README)
+
+          ## Recommended
+          - [ ] Add environment variables to `.env` if your tools need API keys
+          - [ ] Write comprehensive tests for all tools
+          - [ ] Delete this issue when done
+          EOF
+          )"
