@@ -121,6 +121,8 @@ src/
 
 Each module exports a `registerXxxTools(server, config)` function called from `index.ts`.
 
+> **Tool name collisions:** Tool names must be unique within your server too, not just across servers. When multiple modules register tools, prefix each with the module name (e.g., `notes_create_folder` and `finder_create_directory` — NOT both `create_folder`). Duplicate names cause runtime crashes.
+
 ## CI/CD Pipeline
 
 - **CI** (`ci.yml`): gitleaks → large file check → npm ci → license check → audit → lint → build → test

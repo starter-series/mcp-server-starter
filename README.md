@@ -6,7 +6,7 @@
 
 Build your MCP server. One-click publish. Zero secrets needed.
 
-[![CI](https://github.com/heznpc/mcp-server-starter/actions/workflows/ci.yml/badge.svg)](https://github.com/heznpc/mcp-server-starter/actions/workflows/ci.yml)
+[![CI](https://github.com/starter-series/mcp-server-starter/actions/workflows/ci.yml/badge.svg)](https://github.com/starter-series/mcp-server-starter/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![npm version](https://img.shields.io/npm/v/my-mcp-server.svg)](https://www.npmjs.com/package/my-mcp-server)
 
@@ -16,9 +16,9 @@ Build your MCP server. One-click publish. Zero secrets needed.
 
 ---
 
-> **Part of [Starter Series](https://github.com/heznpc/starter-series)** — Stop explaining CI/CD to your AI every time. Clone and start.
+> **Part of [Starter Series](https://github.com/starter-series/starter-series)** — Stop explaining CI/CD to your AI every time. Clone and start.
 >
-> [Docker Deploy](https://github.com/heznpc/docker-deploy-starter) · [Discord Bot](https://github.com/heznpc/discord-bot-starter) · [Telegram Bot](https://github.com/heznpc/telegram-bot-starter) · [Browser Extension](https://github.com/heznpc/browser-extension-starter) · [Electron App](https://github.com/heznpc/electron-app-starter) · [npm Package](https://github.com/heznpc/npm-package-starter) · [React Native](https://github.com/heznpc/react-native-starter) · [VS Code Extension](https://github.com/heznpc/vscode-extension-starter) · **MCP Server**
+> [Docker Deploy](https://github.com/starter-series/docker-deploy-starter) · [Discord Bot](https://github.com/starter-series/discord-bot-starter) · [Telegram Bot](https://github.com/starter-series/telegram-bot-starter) · [Browser Extension](https://github.com/starter-series/browser-extension-starter) · [Electron App](https://github.com/starter-series/electron-app-starter) · [npm Package](https://github.com/starter-series/npm-package-starter) · [React Native](https://github.com/starter-series/react-native-starter) · [VS Code Extension](https://github.com/starter-series/vscode-extension-starter) · **MCP Server**
 
 ---
 
@@ -37,7 +37,7 @@ Build your MCP server. One-click publish. Zero secrets needed.
 ## Quick Start
 
 ```bash
-git clone https://github.com/heznpc/mcp-server-starter.git my-mcp-server
+git clone https://github.com/starter-series/mcp-server-starter.git my-mcp-server
 cd my-mcp-server
 rm -rf .git && git init
 
@@ -46,6 +46,8 @@ npm run dev
 ```
 
 ## Adding Tools
+
+> **Tool names must be globally unique** across all MCP servers a client connects to. Prefix with your module name (e.g., `mymodule_action` instead of `action`).
 
 Create `src/tools/your-tool.ts`:
 
@@ -116,6 +118,78 @@ Register in `src/index.ts`:
 import * as yourPrompt from './prompts/your-prompt.js';
 server.prompt(yourPrompt.name, yourPrompt.description, yourPrompt.schema, yourPrompt.handler);
 ```
+
+## Adding Resources
+
+```ts
+server.resource("example://data", "Example Resource", async () => ({
+  contents: [{ uri: "example://data", text: "Resource content here" }]
+}));
+```
+
+## HTTP Transport
+
+This starter uses **stdio** (the standard for local MCP servers). If you need HTTP transport — for registries like [Smithery](https://smithery.ai)/[mcp.so](https://mcp.so) or remote deployments — use `StreamableHTTPServerTransport` with Express:
+
+```ts
+import express from 'express';
+import { randomUUID } from 'node:crypto';
+import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
+import { isInitializeRequest } from '@modelcontextprotocol/sdk/types.js';
+
+const app = express();
+app.use(express.json());
+
+const sessions = new Map<string, StreamableHTTPServerTransport>();
+
+app.post('/mcp', async (req, res) => {
+  const sessionId = req.headers['mcp-session-id'] as string;
+  const existing = sessions.get(sessionId);
+
+  if (existing) {
+    await existing.handleRequest(req, res);
+    return;
+  }
+
+  if (!isInitializeRequest(req.body)) {
+    res.status(400).json({ error: 'Bad Request: Not an initialize request' });
+    return;
+  }
+
+  const transport = new StreamableHTTPServerTransport({
+    sessionIdGenerator: () => randomUUID(),
+  });
+
+  transport.onclose = () => {
+    const id = transport.sessionId;
+    if (id) sessions.delete(id);
+  };
+
+  const server = createServer(); // your McpServer factory
+  await server.connect(transport);
+  if (transport.sessionId) sessions.set(transport.sessionId, transport);
+  await transport.handleRequest(req, res);
+});
+
+app.get('/mcp', async (req, res) => {
+  const t = sessions.get(req.headers['mcp-session-id'] as string);
+  if (!t) return res.status(400).end();
+  await t.handleRequest(req, res);
+});
+
+app.delete('/mcp', async (req, res) => {
+  const t = sessions.get(req.headers['mcp-session-id'] as string);
+  if (!t) return res.status(400).end();
+  await t.handleRequest(req, res);
+});
+
+app.listen(3000);
+```
+
+> **Why the complexity?** Without `isInitializeRequest`, every POST creates a new transport → "Already connected" errors. Without GET, clients can't receive server notifications via SSE.
+
+See the [MCP SDK docs](https://github.com/modelcontextprotocol/typescript-sdk) for full details.
 
 ## Testing Locally
 
@@ -199,7 +273,7 @@ tests/
 | `npm run dev` | Run with tsx (no build needed) |
 | `npm run build` | Compile TypeScript |
 | `npm start` | Run compiled server |
-| `npm test` | Build + run tests |
+| `npm test` | Build + run tests (`pretest` auto-builds) |
 | `npm run lint` | ESLint |
 | `npm run version:patch` | Bump patch version |
 

@@ -3,7 +3,8 @@
  * Use ok() for success, err() for errors — tools should never throw.
  */
 
-export function ok(text: string) {
+export function ok(data: unknown) {
+  const text = typeof data === 'string' ? data : JSON.stringify(data);
   return {
     content: [{ type: 'text' as const, text }],
   };

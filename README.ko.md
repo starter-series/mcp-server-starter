@@ -6,7 +6,7 @@
 
 MCP 서버를 만들고, push로 배포하세요. 시크릿 0개.
 
-[![CI](https://github.com/heznpc/mcp-server-starter/actions/workflows/ci.yml/badge.svg)](https://github.com/heznpc/mcp-server-starter/actions/workflows/ci.yml)
+[![CI](https://github.com/starter-series/mcp-server-starter/actions/workflows/ci.yml/badge.svg)](https://github.com/starter-series/mcp-server-starter/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![npm version](https://img.shields.io/npm/v/my-mcp-server.svg)](https://www.npmjs.com/package/my-mcp-server)
 
@@ -16,9 +16,9 @@ MCP 서버를 만들고, push로 배포하세요. 시크릿 0개.
 
 ---
 
-> **[Starter Series](https://github.com/heznpc/starter-series)** — 매번 AI한테 CI/CD 설명하지 마세요. Clone하고 바로 시작하세요.
+> **[Starter Series](https://github.com/starter-series/starter-series)** — 매번 AI한테 CI/CD 설명하지 마세요. Clone하고 바로 시작하세요.
 >
-> [Docker 배포](https://github.com/heznpc/docker-deploy-starter) · [Discord 봇](https://github.com/heznpc/discord-bot-starter) · [Telegram 봇](https://github.com/heznpc/telegram-bot-starter) · [브라우저 확장](https://github.com/heznpc/browser-extension-starter) · [Electron 앱](https://github.com/heznpc/electron-app-starter) · [npm 패키지](https://github.com/heznpc/npm-package-starter) · [React Native](https://github.com/heznpc/react-native-starter) · [VS Code 확장](https://github.com/heznpc/vscode-extension-starter) · **MCP 서버**
+> [Docker 배포](https://github.com/starter-series/docker-deploy-starter) · [Discord 봇](https://github.com/starter-series/discord-bot-starter) · [Telegram 봇](https://github.com/starter-series/telegram-bot-starter) · [브라우저 확장](https://github.com/starter-series/browser-extension-starter) · [Electron 앱](https://github.com/starter-series/electron-app-starter) · [npm 패키지](https://github.com/starter-series/npm-package-starter) · [React Native](https://github.com/starter-series/react-native-starter) · [VS Code 확장](https://github.com/starter-series/vscode-extension-starter) · **MCP 서버**
 
 ---
 
@@ -37,7 +37,7 @@ MCP 서버를 만들고, push로 배포하세요. 시크릿 0개.
 ## 빠른 시작
 
 ```bash
-git clone https://github.com/heznpc/mcp-server-starter.git my-mcp-server
+git clone https://github.com/starter-series/mcp-server-starter.git my-mcp-server
 cd my-mcp-server
 rm -rf .git && git init
 
@@ -46,6 +46,8 @@ npm run dev
 ```
 
 ## Tool 추가
+
+> **Tool 이름은 클라이언트에 연결된 모든 MCP 서버에서 전역 고유해야 합니다.** 모듈 접두사를 붙이세요 (예: `action` 대신 `mymodule_action`).
 
 `src/tools/your-tool.ts` 생성:
 
@@ -116,6 +118,78 @@ export function handler({ param }: { param?: string }) {
 import * as yourPrompt from './prompts/your-prompt.js';
 server.prompt(yourPrompt.name, yourPrompt.description, yourPrompt.schema, yourPrompt.handler);
 ```
+
+## Resource 추가
+
+```ts
+server.resource("example://data", "Example Resource", async () => ({
+  contents: [{ uri: "example://data", text: "리소스 내용" }]
+}));
+```
+
+## HTTP 트랜스포트
+
+이 스타터는 **stdio**를 사용합니다 (로컬 MCP 서버의 표준). HTTP 트랜스포트가 필요한 경우 — [Smithery](https://smithery.ai)/[mcp.so](https://mcp.so) 같은 레지스트리 등록이나 원격 배포 — `StreamableHTTPServerTransport` + Express 패턴을 사용하세요:
+
+```ts
+import express from 'express';
+import { randomUUID } from 'node:crypto';
+import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
+import { isInitializeRequest } from '@modelcontextprotocol/sdk/types.js';
+
+const app = express();
+app.use(express.json());
+
+const sessions = new Map<string, StreamableHTTPServerTransport>();
+
+app.post('/mcp', async (req, res) => {
+  const sessionId = req.headers['mcp-session-id'] as string;
+  const existing = sessions.get(sessionId);
+
+  if (existing) {
+    await existing.handleRequest(req, res);
+    return;
+  }
+
+  if (!isInitializeRequest(req.body)) {
+    res.status(400).json({ error: 'Bad Request: Not an initialize request' });
+    return;
+  }
+
+  const transport = new StreamableHTTPServerTransport({
+    sessionIdGenerator: () => randomUUID(),
+  });
+
+  transport.onclose = () => {
+    const id = transport.sessionId;
+    if (id) sessions.delete(id);
+  };
+
+  const server = createServer(); // your McpServer factory
+  await server.connect(transport);
+  if (transport.sessionId) sessions.set(transport.sessionId, transport);
+  await transport.handleRequest(req, res);
+});
+
+app.get('/mcp', async (req, res) => {
+  const t = sessions.get(req.headers['mcp-session-id'] as string);
+  if (!t) return res.status(400).end();
+  await t.handleRequest(req, res);
+});
+
+app.delete('/mcp', async (req, res) => {
+  const t = sessions.get(req.headers['mcp-session-id'] as string);
+  if (!t) return res.status(400).end();
+  await t.handleRequest(req, res);
+});
+
+app.listen(3000);
+```
+
+> **왜 이렇게 복잡한가?** `isInitializeRequest` 없이는 모든 POST가 새 transport를 생성 → "Already connected" 에러. GET 없이는 클라이언트가 SSE를 통한 서버 notification을 받을 수 없습니다.
+
+자세한 내용은 [MCP SDK 문서](https://github.com/modelcontextprotocol/typescript-sdk) 참고.
 
 ## 로컬 테스트
 
@@ -199,7 +273,7 @@ tests/
 | `npm run dev` | tsx로 실행 (빌드 불필요) |
 | `npm run build` | TypeScript 컴파일 |
 | `npm start` | 컴파일된 서버 실행 |
-| `npm test` | 빌드 + 테스트 |
+| `npm test` | 빌드 + 테스트 (`pretest`가 자동 빌드) |
 | `npm run lint` | ESLint |
 | `npm run version:patch` | 패치 버전 올리기 |
 
