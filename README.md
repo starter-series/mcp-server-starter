@@ -240,6 +240,14 @@ Add to `~/Library/Application Support/Claude/claude_desktop_config.json`:
 6. Build (TypeScript compilation)
 7. Test (Jest)
 
+### Security & Maintenance
+
+| Workflow | What it does |
+|----------|-------------|
+| CodeQL (`codeql.yml`) | Static analysis for security vulnerabilities (push/PR + weekly) |
+| Maintenance (`maintenance.yml`) | Weekly CI health check — auto-creates issue on failure |
+| Stale (`stale.yml`) | Labels inactive issues/PRs after 30 days, auto-closes after 7 more |
+
 ### CD (manual trigger)
 
 1. CI gate (must pass)
