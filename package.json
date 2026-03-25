@@ -17,16 +17,19 @@
     "lint": "eslint src/",
     "pretest": "npm run build",
     "test": "node --experimental-vm-modules node_modules/.bin/jest",
+    "format": "prettier --write src/",
+    "format:check": "prettier --check src/",
     "version:patch": "npm version patch --no-git-tag-version",
     "version:minor": "npm version minor --no-git-tag-version",
-    "version:major": "npm version major --no-git-tag-version"
+    "version:major": "npm version major --no-git-tag-version",
+    "version:sync": "node -e \"console.log(JSON.parse(require('fs').readFileSync('package.json','utf8')).version)\""
   },
   "engines": {
     "node": ">=20"
   },
   "license": "MIT",
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.27.0",
+    "@modelcontextprotocol/sdk": "^1.27.1",
     "zod": "^4.3.6"
   },
   "devDependencies": {
@@ -37,6 +40,8 @@
     "jest": "^30.3.0",
     "tsx": "^4.19.0",
     "typescript": "^5.8.0",
+    "eslint-config-prettier": "^10.1.0",
+    "prettier": "^3.5.0",
     "typescript-eslint": "^8.20.0"
   }
 }

@@ -1,14 +1,18 @@
+import { createRequire } from 'node:module';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { parseConfig } from './config.js';
 import * as greet from './tools/greet.js';
 import * as hello from './prompts/hello.js';
 
+const require = createRequire(import.meta.url);
+const { name, version } = require('../package.json') as { name: string; version: string };
+
 const config = parseConfig();
 
 const server = new McpServer({
-  name: 'my-mcp-server',
-  version: '1.0.0',
+  name,
+  version,
 });
 
 // Tools — use registerTool for full control (annotations, title)
