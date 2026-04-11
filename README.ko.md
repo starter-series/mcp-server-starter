@@ -18,7 +18,7 @@ MCP 서버를 만들고, push로 배포하세요. 시크릿 0개.
 
 > **[Starter Series](https://github.com/starter-series/starter-series)** — 매번 AI한테 CI/CD 설명하지 마세요. Clone하고 바로 시작하세요.
 >
-> [Docker 배포](https://github.com/starter-series/docker-deploy-starter) · [Discord 봇](https://github.com/starter-series/discord-bot-starter) · [Telegram 봇](https://github.com/starter-series/telegram-bot-starter) · [브라우저 확장](https://github.com/starter-series/browser-extension-starter) · [Electron 앱](https://github.com/starter-series/electron-app-starter) · [npm 패키지](https://github.com/starter-series/npm-package-starter) · [React Native](https://github.com/starter-series/react-native-starter) · [VS Code 확장](https://github.com/starter-series/vscode-extension-starter) · **MCP 서버**
+> [Docker 배포](https://github.com/starter-series/docker-deploy-starter) · [Discord 봇](https://github.com/starter-series/discord-bot-starter) · [Telegram 봇](https://github.com/starter-series/telegram-bot-starter) · [브라우저 확장](https://github.com/starter-series/browser-extension-starter) · [Electron 앱](https://github.com/starter-series/electron-app-starter) · [npm 패키지](https://github.com/starter-series/npm-package-starter) · [React Native](https://github.com/starter-series/react-native-starter) · [VS Code 확장](https://github.com/starter-series/vscode-extension-starter) · **MCP 서버** · [Python MCP 서버](https://github.com/starter-series/python-mcp-server-starter) · [Cloudflare Pages](https://github.com/starter-series/cloudflare-pages-starter)
 
 ---
 
