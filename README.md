@@ -36,13 +36,18 @@ Build your MCP server. One-click publish. Zero secrets needed.
 
 ## Quick Start
 
-```bash
-git clone https://github.com/starter-series/mcp-server-starter.git my-mcp-server
-cd my-mcp-server
-rm -rf .git && git init
+**Via [create-starter](https://github.com/starter-series/create-starter)** (recommended):
 
-npm install
-npm run dev
+```bash
+npx @starter-series/create my-mcp-server --template mcp-server
+cd my-mcp-server && npm install && npm run dev
+```
+
+**Or clone directly:**
+
+```bash
+git clone https://github.com/starter-series/mcp-server-starter my-mcp-server
+cd my-mcp-server && npm install && npm run dev
 ```
 
 ## Adding Tools
