@@ -4,6 +4,7 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { parseConfig } from './config.js';
 import * as greet from './tools/greet.js';
+import * as serverInfo from './resources/server-info.js';
 import * as hello from './prompts/hello.js';
 
 const require = createRequire(import.meta.url);
@@ -22,10 +23,8 @@ server.registerTool(greet.name, greet.config, greet.handler);
 // import { registerNoteTools } from './notes/tools.js';
 // registerNoteTools(server, config);
 
-// Resources — expose data to the client (replace with your own)
-server.resource("example://data", "Example Resource", async () => ({
-  contents: [{ uri: "example://data", text: "Replace with your resource data" }],
-}));
+// Resources — expose data to the client. Use registerResource for full control.
+server.registerResource(serverInfo.name, serverInfo.uri, serverInfo.metadata, serverInfo.handler);
 
 // Prompts — guided workflows for common tasks
 server.prompt(hello.name, hello.description, hello.schema, hello.handler);
