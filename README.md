@@ -121,10 +121,32 @@ server.prompt(yourPrompt.name, yourPrompt.description, yourPrompt.schema, yourPr
 
 ## Adding Resources
 
+Resources expose **data** to the client (Tools perform **actions**). See `src/resources/server-info.ts` for a working example.
+
+Create `src/resources/your-resource.ts`:
+
 ```ts
-server.resource("example://data", "Example Resource", async () => ({
-  contents: [{ uri: "example://data", text: "Resource content here" }]
-}));
+export const name = 'your-resource';
+export const uri = 'info://your/resource';
+
+export const metadata = {
+  title: 'Your Resource',
+  description: 'What this resource exposes',
+  mimeType: 'application/json',
+};
+
+export async function handler(resourceUri: URL) {
+  return {
+    contents: [{ uri: resourceUri.href, mimeType: metadata.mimeType, text: '...' }],
+  };
+}
+```
+
+Register in `src/index.ts`:
+
+```ts
+import * as yourResource from './resources/your-resource.js';
+server.registerResource(yourResource.name, yourResource.uri, yourResource.metadata, yourResource.handler);
 ```
 
 ## HTTP Transport
@@ -261,16 +283,19 @@ Add to `~/Library/Application Support/Claude/claude_desktop_config.json`:
 
 ```
 src/
-├── index.ts              # Server entry — tool/prompt registration + transport
+├── index.ts              # Server entry — tool/resource/prompt registration + transport
 ├── config.ts             # Environment variable config
 ├── helpers.ts            # ok() / err() response helpers
 ├── tools/
 │   └── greet.ts          # Example tool with annotations (replace with your own)
+├── resources/
+│   └── server-info.ts    # Example resource exposing server metadata (replace)
 └── prompts/
     └── hello.ts          # Example prompt (replace with your own)
 tests/
 ├── greet.test.js         # Tool tests
 ├── helpers.test.js       # Helper tests
+├── server-info.test.js   # Resource tests
 └── hello.test.js         # Prompt tests
 ```
 

@@ -121,10 +121,32 @@ server.prompt(yourPrompt.name, yourPrompt.description, yourPrompt.schema, yourPr
 
 ## Resource 추가
 
+Resource는 클라이언트에 **데이터**를 노출합니다 (Tool은 **동작**을 수행). 실제 예시는 `src/resources/server-info.ts` 참고.
+
+`src/resources/your-resource.ts` 생성:
+
 ```ts
-server.resource("example://data", "Example Resource", async () => ({
-  contents: [{ uri: "example://data", text: "리소스 내용" }]
-}));
+export const name = 'your-resource';
+export const uri = 'info://your/resource';
+
+export const metadata = {
+  title: 'Your Resource',
+  description: '이 resource가 노출하는 데이터',
+  mimeType: 'application/json',
+};
+
+export async function handler(resourceUri: URL) {
+  return {
+    contents: [{ uri: resourceUri.href, mimeType: metadata.mimeType, text: '...' }],
+  };
+}
+```
+
+`src/index.ts`에 등록:
+
+```ts
+import * as yourResource from './resources/your-resource.js';
+server.registerResource(yourResource.name, yourResource.uri, yourResource.metadata, yourResource.handler);
 ```
 
 ## HTTP 트랜스포트
@@ -261,16 +283,19 @@ npx @modelcontextprotocol/inspector node dist/index.js
 
 ```
 src/
-├── index.ts              # 서버 진입점 — Tool/Prompt 등록 + 트랜스포트
+├── index.ts              # 서버 진입점 — Tool/Resource/Prompt 등록 + 트랜스포트
 ├── config.ts             # 환경변수 설정
 ├── helpers.ts            # ok() / err() 응답 헬퍼
 ├── tools/
 │   └── greet.ts          # 예시 Tool + annotations (교체해서 사용)
+├── resources/
+│   └── server-info.ts    # 서버 메타데이터 Resource 예시 (교체해서 사용)
 └── prompts/
     └── hello.ts          # 예시 Prompt (교체해서 사용)
 tests/
 ├── greet.test.js         # Tool 테스트
 ├── helpers.test.js       # 헬퍼 테스트
+├── server-info.test.js   # Resource 테스트
 └── hello.test.js         # Prompt 테스트
 ```
 
