@@ -7,7 +7,7 @@ export const config = {
   title: 'Greet',
   description: 'Greet someone by name',
   inputSchema: {
-    name: z.string().describe('Name to greet'),
+    name: z.string().min(1).max(200).describe('Name to greet'),
   },
   annotations: {
     readOnlyHint: true,
