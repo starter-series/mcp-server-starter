@@ -89,24 +89,27 @@ server.registerTool(yourTool.name, yourTool.config, yourTool.handler);
 
 ## Adding Prompts
 
+Prompts are reusable, parameterized message templates the client can surface to the user or feed to the model. Use `registerPrompt` (SDK v1.29+) for full control — `title` + `description` + Zod-validated `argsSchema`. See `src/prompts/code-review.ts` for a templated example.
+
 Create `src/prompts/your-prompt.ts`:
 
 ```ts
 import { z } from 'zod';
 
 export const name = 'your-prompt';
+export const title = 'Your Prompt';
 export const description = 'Guided workflow description';
 
-export const schema = {
-  param: z.string().optional().describe('Optional parameter'),
+export const argsSchema = {
+  param: z.string().min(1).describe('Required parameter'),
 };
 
-export function handler({ param }: { param?: string }) {
+export function handler({ param }: { param: string }) {
   return {
     description,
     messages: [{
       role: 'user' as const,
-      content: { type: 'text' as const, text: `Prompt text with ${param ?? 'default'}` },
+      content: { type: 'text' as const, text: `Prompt text with ${param}` },
     }],
   };
 }
@@ -116,7 +119,11 @@ Register in `src/index.ts`:
 
 ```ts
 import * as yourPrompt from './prompts/your-prompt.js';
-server.prompt(yourPrompt.name, yourPrompt.description, yourPrompt.schema, yourPrompt.handler);
+server.registerPrompt(
+  yourPrompt.name,
+  { title: yourPrompt.title, description: yourPrompt.description, argsSchema: yourPrompt.argsSchema },
+  yourPrompt.handler,
+);
 ```
 
 ## Adding Resources
@@ -291,12 +298,14 @@ src/
 ├── resources/
 │   └── server-info.ts    # Example resource exposing server metadata (replace)
 └── prompts/
-    └── hello.ts          # Example prompt (replace with your own)
+    ├── hello.ts          # Zero-arg prompt example (replace with your own)
+    └── code-review.ts    # Templated prompt with Zod-validated args
 tests/
 ├── greet.test.js         # Tool tests
 ├── helpers.test.js       # Helper tests
 ├── server-info.test.js   # Resource tests
-└── hello.test.js         # Prompt tests
+├── hello.test.js         # Prompt tests
+└── code-review.test.js   # Templated prompt tests
 ```
 
 ## Scripts

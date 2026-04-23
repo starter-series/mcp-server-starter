@@ -6,6 +6,7 @@ import { parseConfig } from './config.js';
 import * as greet from './tools/greet.js';
 import * as serverInfo from './resources/server-info.js';
 import * as hello from './prompts/hello.js';
+import * as codeReview from './prompts/code-review.js';
 
 const require = createRequire(import.meta.url);
 const { name, version } = require('../package.json') as { name: string; version: string };
@@ -26,8 +27,18 @@ server.registerTool(greet.name, greet.config, greet.handler);
 // Resources — expose data to the client. Use registerResource for full control.
 server.registerResource(serverInfo.name, serverInfo.uri, serverInfo.metadata, serverInfo.handler);
 
-// Prompts — guided workflows for common tasks
+// Prompts — guided workflows for common tasks. Use registerPrompt for full control
+// (title + description + argsSchema config object).
 server.prompt(hello.name, hello.description, hello.schema, hello.handler);
+server.registerPrompt(
+  codeReview.name,
+  {
+    title: codeReview.title,
+    description: codeReview.description,
+    argsSchema: codeReview.argsSchema,
+  },
+  codeReview.handler,
+);
 
 const transport = new StdioServerTransport();
 
