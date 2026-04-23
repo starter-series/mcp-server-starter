@@ -89,24 +89,27 @@ server.registerTool(yourTool.name, yourTool.config, yourTool.handler);
 
 ## Prompt 추가
 
+Prompt는 클라이언트가 사용자에게 노출하거나 모델에 주입할 수 있는, 파라미터화된 재사용 메시지 템플릿입니다. SDK v1.29+에서는 `registerPrompt`로 `title` + `description` + Zod `argsSchema`를 함께 등록하세요. 템플릿 예시는 `src/prompts/code-review.ts` 참고.
+
 `src/prompts/your-prompt.ts` 생성:
 
 ```ts
 import { z } from 'zod';
 
 export const name = 'your-prompt';
+export const title = 'Your Prompt';
 export const description = '가이드 워크플로우 설명';
 
-export const schema = {
-  param: z.string().optional().describe('선택 파라미터'),
+export const argsSchema = {
+  param: z.string().min(1).describe('필수 파라미터'),
 };
 
-export function handler({ param }: { param?: string }) {
+export function handler({ param }: { param: string }) {
   return {
     description,
     messages: [{
       role: 'user' as const,
-      content: { type: 'text' as const, text: `프롬프트 텍스트 ${param ?? '기본값'}` },
+      content: { type: 'text' as const, text: `프롬프트 텍스트 ${param}` },
     }],
   };
 }
@@ -116,7 +119,11 @@ export function handler({ param }: { param?: string }) {
 
 ```ts
 import * as yourPrompt from './prompts/your-prompt.js';
-server.prompt(yourPrompt.name, yourPrompt.description, yourPrompt.schema, yourPrompt.handler);
+server.registerPrompt(
+  yourPrompt.name,
+  { title: yourPrompt.title, description: yourPrompt.description, argsSchema: yourPrompt.argsSchema },
+  yourPrompt.handler,
+);
 ```
 
 ## Resource 추가
@@ -291,12 +298,14 @@ src/
 ├── resources/
 │   └── server-info.ts    # 서버 메타데이터 Resource 예시 (교체해서 사용)
 └── prompts/
-    └── hello.ts          # 예시 Prompt (교체해서 사용)
+    ├── hello.ts          # 무인자 Prompt 예시 (교체해서 사용)
+    └── code-review.ts    # Zod 검증 포함 템플릿 Prompt
 tests/
 ├── greet.test.js         # Tool 테스트
 ├── helpers.test.js       # 헬퍼 테스트
 ├── server-info.test.js   # Resource 테스트
-└── hello.test.js         # Prompt 테스트
+├── hello.test.js         # Prompt 테스트
+└── code-review.test.js   # 템플릿 Prompt 테스트
 ```
 
 ## 스크립트
