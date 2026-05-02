@@ -32,7 +32,7 @@
     "version:sync": "node -e \"console.log(JSON.parse(require('fs').readFileSync('package.json','utf8')).version)\""
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   },
   "license": "MIT",
   "dependencies": {
