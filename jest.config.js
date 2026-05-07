@@ -12,4 +12,8 @@ export default {
       lines: 95,
     },
   },
+  // text reporters only: avoids writing coverage/lcov-report/*.html into
+  // the workspace, which CodeQL would otherwise scan and flag for XSS in
+  // jest's bundled report viewer (sorter.js).
+  coverageReporters: ['text', 'text-summary', 'json-summary'],
 };
