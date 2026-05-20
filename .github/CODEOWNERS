@@ -1,0 +1,13 @@
+# CODEOWNERS — automatic review requests for PRs.
+# Order matters: later patterns override earlier ones.
+# See: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-security/customizing-your-repository/about-code-owners
+
+# Default owner for everything in the repo.
+*       @heznpc
+
+# Security-critical surfaces — owner review is mandatory regardless of
+# `required_approving_review_count`.
+/.github/workflows/    @heznpc
+/SECURITY.md           @heznpc
+/package.json          @heznpc
+/package-lock.json     @heznpc

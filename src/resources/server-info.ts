@@ -3,10 +3,10 @@
  * fixed URI. Resources are how you expose data to the client (in contrast to
  * Tools which perform actions). Replace with your own resource.
  */
-import { createRequire } from "node:module";
+// JSON modules — stable in Node 22; replaces `createRequire(import.meta.url)`.
+import packageJson from "../../package.json" with { type: "json" };
 
-const require = createRequire(import.meta.url);
-const pkg = require("../../package.json") as { name: string; version: string };
+const pkg = packageJson as { name: string; version: string };
 
 export const name = "server-info";
 export const uri = "info://server/status";

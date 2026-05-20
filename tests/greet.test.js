@@ -14,6 +14,17 @@ describe('greet tool', () => {
     expect(result.content[0].text).toBe('Hello, MCP!');
   });
 
+  test('returns structuredContent matching outputSchema', async () => {
+    const result = await handler({ name: 'World' });
+    expect(result.structuredContent).toEqual({
+      greeting: 'Hello, World!',
+      language: 'en',
+    });
+    // structuredContent MUST validate against the declared outputSchema (2026 MCP spec).
+    const outputShape = z.object(config.outputSchema);
+    expect(outputShape.safeParse(result.structuredContent).success).toBe(true);
+  });
+
   test('has safety annotations', () => {
     expect(config.annotations.readOnlyHint).toBe(true);
     expect(config.annotations.destructiveHint).toBe(false);

@@ -245,6 +245,8 @@ app.listen(3000);
 
 > **Why the complexity?** Without `isInitializeRequest`, every POST creates a new transport → "Already connected" errors. Without GET, clients can't receive server notifications via SSE.
 
+**Stateless mode** — if your server holds no per-session state (every tool call is independent), construct the transport with `sessionIdGenerator: undefined` and skip the session map. Stateless is simpler to deploy behind a stateless load balancer and is the recommended default for serverless hosts (Cloudflare Workers, Vercel functions). Keep the stateful pattern above only if you need server-initiated notifications or per-session caches.
+
 See the [MCP SDK docs](https://github.com/modelcontextprotocol/typescript-sdk) for full details.
 
 ## Testing Locally

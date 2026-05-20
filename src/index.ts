@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-import { createRequire } from 'node:module';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { parseConfig } from './config.js';
@@ -7,9 +6,10 @@ import * as greet from './tools/greet.js';
 import * as serverInfo from './resources/server-info.js';
 import * as hello from './prompts/hello.js';
 import * as codeReview from './prompts/code-review.js';
+// JSON modules — stable in Node 22; replaces `createRequire(import.meta.url)`.
+import pkg from '../package.json' with { type: 'json' };
 
-const require = createRequire(import.meta.url);
-const { name, version } = require('../package.json') as { name: string; version: string };
+const { name, version } = pkg as { name: string; version: string };
 
 const config = parseConfig();
 
@@ -60,3 +60,15 @@ const shutdown = async () => {
 
 process.on('SIGINT', shutdown);
 process.on('SIGTERM', shutdown);
+
+// Last-resort safety net — without these, an unhandled rejection in a tool
+// handler (or a sync throw outside the SDK's try/catch) would silently kill
+// the server. Log to stderr so the parent MCP client sees the crash.
+process.on('unhandledRejection', (reason) => {
+  console.error('Unhandled promise rejection:', reason);
+  process.exit(1);
+});
+process.on('uncaughtException', (error) => {
+  console.error('Uncaught exception:', error);
+  process.exit(1);
+});

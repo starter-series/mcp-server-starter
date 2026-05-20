@@ -2,26 +2,39 @@
 
 ## Reporting a Vulnerability
 
-If you discover a security vulnerability, please report it responsibly:
+Please use GitHub's **[Private Vulnerability Reporting](https://github.com/starter-series/mcp-server-starter/security/advisories/new)** for this repository:
 
-1. **Do NOT** open a public issue
-2. Email the maintainer or use GitHub's private vulnerability reporting
+1. Go to the **Security** tab → **Report a vulnerability**.
+2. Fill in the form with reproduction steps, affected version (commit SHA), and impact.
+3. The maintainer will acknowledge within **5 business days** and provide a patch ETA after triage.
 
-## Security Features
+**Do not** open a public issue, pull request, or discussion describing the vulnerability before a fix is published — the GHPVR channel keeps the report private until disclosure.
 
-This template includes several security measures:
+If GHPVR is unavailable, contact the maintainer through the email on their GitHub profile.
 
-- **gitleaks** — Scans for accidentally committed secrets on every push
-- **npm audit** — Checks for known vulnerabilities in dependencies
-- **License compliance** — Blocks copyleft licenses (GPL/AGPL)
-- **Dependabot** — Automated dependency updates for npm and GitHub Actions
-- **OIDC publishing** — No npm tokens stored as secrets
-- **Zod validation** — Runtime input validation on all tool parameters
+## Security Features (template-level)
 
-## Best Practices
+- **gitleaks** — scans for committed secrets on every push (pinned by version + tarball SHA-256 in `ci.yml`).
+- **npm audit** — fails CI on `--audit-level=high`. Transitive vulnerabilities can be pinned via `overrides` in `package.json` when upstream hasn't patched yet.
+- **License compliance** — blocks GPL-2.0 / GPL-3.0 / AGPL-3.0 in CI.
+- **Dependabot** — weekly version updates *and* automatic security updates (enabled at repo level).
+- **Secret scanning + push protection** — GitHub Advanced Security toggles enabled at the repo level.
+- **CodeQL** — static analysis on push, PR, and weekly schedule.
+- **OIDC trusted publishing** — no `NPM_TOKEN` is stored as a GitHub secret.
+- **`npm ci --ignore-scripts`** — postinstall scripts are blocked in CI to defend against compromised packages.
+- **`permissions:` job-level least privilege** — `contents: read` on CI, `id-token: write` only where OIDC publishes.
+- **Zod validation** — runtime schema validation on every tool input (`inputSchema`) and structured output (`outputSchema`).
 
-- Never commit `.env` files or API keys
-- Keep dependencies up to date via Dependabot PRs
-- Validate all tool inputs with Zod schemas
-- Use environment variables for sensitive configuration
+## Best Practices for Downstream Servers
+
+- Never commit `.env` files or API keys; use environment variables via `src/config.ts`.
+- Keep dependencies up to date via Dependabot PRs.
+- Validate every tool input with a Zod schema; validate every tool output (`structuredContent`) too when you declare `outputSchema`.
 - **Shell command injection** — If your MCP tools execute shell commands, always escape or sanitize user input. Never pass raw tool arguments to `child_process.exec()` or template strings in shell commands. Use `execFile()` with explicit argument arrays instead.
+- **Path traversal** — When tools accept filesystem paths, resolve them against an explicit allowed base directory (`path.resolve(base, input)` + verify `result.startsWith(base)`). Reject `..` segments rather than passing them through.
+- **Prompt injection** — Tools and prompts that embed user-controlled strings into messages sent to the model (see `src/prompts/code-review.ts` for the pattern) are an injection surface:
+  - Never concatenate untrusted text into a system-role message.
+  - Treat tool-provided text as data, not as instructions to the model. Where possible, structure prompts so the model is instructed to summarise/analyse the user content rather than follow it.
+  - For high-trust actions, require an out-of-band confirmation (an `elicitation/create` round-trip, or a separate tool call) instead of acting on the model's interpretation.
+- **Resource URI scoping** — When implementing resource handlers, enforce that the URI requested matches the URI you registered. Don't let the client direct your server to read arbitrary paths.
+- **Secret exposure in logs** — `console.error` on stdio goes to the client's stderr stream. Never log full API keys, OAuth tokens, or full user content; log fingerprints (first 4 + last 4 chars) at most.
