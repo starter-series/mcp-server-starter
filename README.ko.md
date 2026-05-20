@@ -22,17 +22,39 @@ MCP 서버를 만들고, push로 배포하세요. 시크릿 0개.
 
 ---
 
-## 포함 사항
+## 이 스타터에 대해
 
-- **MCP SDK** — `@modelcontextprotocol/sdk` + stdio 트랜스포트
-- **TypeScript** — Strict 모드, ES2022, Zod 스키마 검증
-- **Safety Annotations** — 모든 도구에 readOnly/destructive/idempotent 힌트
-- **Prompts** — 가이드 워크플로우 템플릿
-- **응답 헬퍼** — `ok()`과 `err()`로 일관된 도구 응답
-- **Config** — 환경변수 파싱 패턴
-- **CI** — gitleaks, npm audit, 라이선스 검사, ESLint, 빌드, 테스트
-- **CD** — OIDC trusted publishing으로 npm 배포 (시크릿 0개)
-- **Dependabot** — 의존성 + GitHub Actions 자동 업데이트
+**현재 구현됨**
+
+- MCP SDK — `@modelcontextprotocol/sdk` + stdio 트랜스포트
+- TypeScript — Strict 모드, ES2022, Zod 스키마 검증
+- Safety annotations — 모든 도구에 readOnly/destructive/idempotent 힌트
+- Prompts — `registerPrompt` 기반 가이드 워크플로우 템플릿 (SDK v1.29+)
+- Resources — 메타데이터 + 핸들러 패턴의 데이터 노출
+- 응답 헬퍼 — `ok()`과 `err()`로 일관된 도구 응답
+- Config — 환경변수 파싱 패턴
+- CI — gitleaks, npm audit, 라이선스 검사, ESLint, 빌드, 테스트
+- CodeQL — 정적 보안 분석 (push/PR + 주간)
+- CD — OIDC trusted publishing으로 npm 배포 (시크릿 0개)
+- Dependabot — 의존성 + GitHub Actions 자동 업데이트
+
+**계획됨**
+
+공개 로드맵에는 없습니다. 스타터는 의도적으로 완결된 상태이며, 다운스트림 프로젝트가 확장합니다. 호환성 깨지는 변경 (Node EOL, SDK 메이저)은 Dependabot으로 들어옵니다.
+
+**설계 의도**
+
+1분 안에 배포 가능한 MCP 서버를 만들 수 있게 합니다. 로컬 MCP 클라이언트가 전부 stdio를 쓰므로 stdio가 기본값입니다. HTTP 트랜스포트는 인라인 예제로만 보여드리고 (아래 참조) 기본 의존성을 키우지 않습니다. OIDC 배포라 컨트리뷰터가 npm 토큰을 붙여 넣을 일이 없습니다. Tool 이름은 모듈 접두사를 붙여 전역 고유성을 유지합니다 — 서버 간 이름 충돌이 가장 흔한 함정입니다.
+
+**비목표**
+
+- 인증 primitive, HMAC 서명, rate-limit, 감사 로깅, human-in-the-loop 인프라. 이런 것은 호스트가 들고 있을 일이지 서버 템플릿이 들 일이 아닙니다.
+- 기본 스캐폴드에 Express / HTTP 트랜스포트 포함. 템플릿은 작게 유지하고, HTTP는 필요한 사람을 위한 문서로만 제공합니다.
+- 로깅, 트레이싱, 관측성 스택의 선택지를 강요하지 않습니다.
+
+**Redacted**
+
+없음. 공개 템플릿.
 
 ## 빠른 시작
 
@@ -222,6 +244,8 @@ app.listen(3000);
 ```
 
 > **왜 이렇게 복잡한가?** `isInitializeRequest` 없이는 모든 POST가 새 transport를 생성 → "Already connected" 에러. GET 없이는 클라이언트가 SSE를 통한 서버 notification을 받을 수 없습니다.
+
+**Stateless 모드** — 서버가 세션 상태를 들고 있지 않다면 (모든 tool 호출이 독립적) `sessionIdGenerator: undefined`로 transport를 만들고 세션 맵을 생략하세요. Stateless는 stateless load balancer 뒤 배포가 간단하고, serverless 호스트 (Cloudflare Workers, Vercel functions)의 기본 권장값입니다. 서버 발신 notification이나 세션별 캐시가 필요할 때만 위 stateful 패턴을 유지하세요.
 
 자세한 내용은 [MCP SDK 문서](https://github.com/modelcontextprotocol/typescript-sdk) 참고.
 

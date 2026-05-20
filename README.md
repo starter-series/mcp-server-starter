@@ -22,17 +22,39 @@ Build your MCP server. One-click publish. Zero secrets needed.
 
 ---
 
-## What You Get
+## About This Starter
 
-- **MCP SDK** — `@modelcontextprotocol/sdk` with stdio transport
-- **TypeScript** — Strict mode, ES2022 target, Zod-validated tool schemas
-- **Safety Annotations** — readOnly/destructive/idempotent hints on every tool
-- **Prompts** — Guided workflow templates for common tasks
-- **Response Helpers** — `ok()` and `err()` for consistent tool responses
-- **Config** — Environment variable parsing pattern
-- **CI** — gitleaks, npm audit, license compliance, ESLint, build, test
-- **CD** — OIDC trusted publishing to npm (zero secrets needed)
-- **Dependabot** — Automated dependency + GitHub Actions updates
+**Currently implemented**
+
+- MCP SDK — `@modelcontextprotocol/sdk` with stdio transport
+- TypeScript — Strict mode, ES2022 target, Zod-validated schemas
+- Safety annotations — readOnly/destructive/idempotent hints on every tool
+- Prompts — Guided workflow templates via `registerPrompt` (SDK v1.29+)
+- Resources — Data exposure pattern with metadata + handler
+- Response helpers — `ok()` and `err()` for consistent tool responses
+- Config — Environment variable parsing pattern
+- CI — gitleaks, npm audit, license compliance, ESLint, build, test
+- CodeQL — Static security analysis (push/PR + weekly)
+- CD — OIDC trusted publishing to npm (zero secrets needed)
+- Dependabot — Automated dependency + GitHub Actions updates
+
+**Planned**
+
+Nothing on a public roadmap. The starter is intentionally finished; downstream projects extend it. Breaking-change waves (Node EOL, SDK majors) land via Dependabot.
+
+**Design intent**
+
+Bootstrap a publishable MCP server in under a minute. Stdio is the default because every local MCP client speaks it; HTTP transport is shown inline (see below) rather than bundled, to keep the dependency surface minimal. OIDC publishing means contributors never paste an npm token. Globally-unique tool names are enforced by convention — prefix with your module name, since name collisions across servers are the most common foot-gun.
+
+**Non-goals**
+
+- Auth primitives, HMAC signing, rate-limiting, audit logging, human-in-the-loop infra. Those belong in a host, not a server template.
+- Express / HTTP transport in the default scaffold. Template stays small; HTTP is documented for those who need it.
+- Opinionated logging, tracing, or observability stack. Pick what fits downstream.
+
+**Redacted**
+
+None. Public template.
 
 ## Quick Start
 
@@ -222,6 +244,8 @@ app.listen(3000);
 ```
 
 > **Why the complexity?** Without `isInitializeRequest`, every POST creates a new transport → "Already connected" errors. Without GET, clients can't receive server notifications via SSE.
+
+**Stateless mode** — if your server holds no per-session state (every tool call is independent), construct the transport with `sessionIdGenerator: undefined` and skip the session map. Stateless is simpler to deploy behind a stateless load balancer and is the recommended default for serverless hosts (Cloudflare Workers, Vercel functions). Keep the stateful pattern above only if you need server-initiated notifications or per-session caches.
 
 See the [MCP SDK docs](https://github.com/modelcontextprotocol/typescript-sdk) for full details.
 
