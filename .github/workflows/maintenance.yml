@@ -1,8 +1,11 @@
 name: Maintenance
 
 on:
-  schedule:
-    - cron: '0 0 * * 1' # Every Monday 00:00 UTC
+  # TODO(2026-05-21): cron paused — weekly maintenance failing in CI.
+  # Re-enable after diagnosing the broken ci.yml step in a dedicated session.
+  # Original cadence: '0 0 * * 1' (Mondays 00:00 UTC)
+  # schedule:
+  #   - cron: '0 0 * * 1'
   workflow_dispatch:
 
 permissions:
