@@ -2,10 +2,8 @@
  * Standard MCP response helpers.
  * Use ok() for success, err() for errors — tools should never throw.
  *
- * The 2026 MCP spec REQUIRES `structuredContent` when a tool declares an
- * `outputSchema`. Pass a structured payload as the second argument and it
- * will be set alongside the text content (the text mirror is kept so
- * clients that ignore `structuredContent` still see a value).
+ * `structured` mirrors the text payload for clients that read
+ * `structuredContent` (required when a tool declares `outputSchema`).
  */
 
 type TextContent = { type: 'text'; text: string };
