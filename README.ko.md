@@ -27,7 +27,7 @@ MCP 서버를 만들고, push로 배포하세요. 시크릿 0개.
 **현재 구현됨**
 
 - MCP SDK — `@modelcontextprotocol/sdk` + stdio 트랜스포트
-- TypeScript — Strict 모드, ES2022, Zod 스키마 검증
+- TypeScript — Strict 모드 (`noUncheckedIndexedAccess` + `verbatimModuleSyntax` 포함), ES2023 target, Zod 입출력 스키마 검증
 - Safety annotations — 모든 도구에 readOnly/destructive/idempotent 힌트
 - Prompts — `registerPrompt` 기반 가이드 워크플로우 템플릿 (SDK v1.29+)
 - Resources — 메타데이터 + 핸들러 패턴의 데이터 노출
