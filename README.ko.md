@@ -90,6 +90,13 @@ export const config = {
   inputSchema: {
     input: z.string().describe('입력 파라미터'),
   },
+  // structured 응답이 필요하면 `outputSchema`를 선언하세요 — 2026 MCP spec은
+  // outputSchema가 선언된 경우 서버가 `structuredContent` (이 스키마로 검증된)
+  // 를 텍스트 미러와 함께 반환할 것을 요구합니다. 자유 텍스트만 돌려주는
+  // tool이면 `outputSchema`는 생략합니다.
+  outputSchema: {
+    result: z.string().describe('처리된 결과'),
+  },
   annotations: {
     readOnlyHint: true,
     destructiveHint: false,
@@ -100,7 +107,10 @@ export const config = {
 
 export async function handler({ input }: { input: string }) {
   try {
-    return ok(`결과: ${input}`);
+    const result = `결과: ${input}`;
+    // structured payload를 `ok()`의 두 번째 인자로 전달하면 `content[]`의
+    // 텍스트 미러 옆에 `structuredContent`로 함께 세팅됩니다.
+    return ok(result, { result });
   } catch (e) {
     return err(`실패: ${e instanceof Error ? e.message : String(e)}`);
   }
