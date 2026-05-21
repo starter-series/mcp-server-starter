@@ -90,6 +90,13 @@ export const config = {
   inputSchema: {
     input: z.string().describe('Input parameter'),
   },
+  // Declare `outputSchema` to return structured results — the 2026 MCP spec
+  // requires servers to populate `structuredContent` (validated against this
+  // schema) alongside the text mirror. Omit `outputSchema` for free-form
+  // text-only tools.
+  outputSchema: {
+    result: z.string().describe('Processed value'),
+  },
   annotations: {
     readOnlyHint: true,
     destructiveHint: false,
@@ -100,7 +107,10 @@ export const config = {
 
 export async function handler({ input }: { input: string }) {
   try {
-    return ok(`Processed: ${input}`);
+    const result = `Processed: ${input}`;
+    // Pass the structured payload as the second arg to `ok()` — it's set as
+    // `structuredContent` alongside the text mirror in `content[]`.
+    return ok(result, { result });
   } catch (e) {
     return err(`Failed: ${e instanceof Error ? e.message : String(e)}`);
   }

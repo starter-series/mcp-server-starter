@@ -34,6 +34,12 @@ tests/
      inputSchema: {
        param: z.string().describe('Parameter description'),
      },
+     // outputSchema makes the handler return `structuredContent` validated
+     // against this shape. REQUIRED by the 2026 MCP spec when declared.
+     // Omit for free-form text-only tools.
+     outputSchema: {
+       result: z.string().describe('Processed value'),
+     },
      annotations: {
        readOnlyHint: true,       // Does not modify anything
        destructiveHint: false,    // Not destructive
@@ -44,7 +50,9 @@ tests/
 
    export async function handler({ param }: { param: string }) {
      try {
-       return ok(`Result: ${param}`);
+       const result = `Result: ${param}`;
+       // Second arg to ok() → structuredContent alongside the text mirror.
+       return ok(result, { result });
      } catch (e) {
        return err(`Failed: ${e instanceof Error ? e.message : String(e)}`);
      }
