@@ -27,7 +27,7 @@ Build your MCP server. One-click publish. Zero secrets needed.
 **Currently implemented**
 
 - MCP SDK — `@modelcontextprotocol/sdk` with stdio transport
-- TypeScript — Strict mode, ES2022 target, Zod-validated schemas
+- TypeScript — Strict mode (incl. `noUncheckedIndexedAccess` + `verbatimModuleSyntax`), ES2023 target, Zod-validated input & output schemas
 - Safety annotations — readOnly/destructive/idempotent hints on every tool
 - Prompts — Guided workflow templates via `registerPrompt` (SDK v1.29+)
 - Resources — Data exposure pattern with metadata + handler
