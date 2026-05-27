@@ -6,17 +6,27 @@
 
 ```
 src/
-├── index.ts              # Server entry point — registers tools/prompts and starts transport
+├── index.ts              # Server entry point — registers tools/resources/prompts and starts transport
 ├── config.ts             # Environment variable parsing
-├── helpers.ts            # Response helpers: ok() and err()
+├── helpers.ts            # Response helpers: ok() and err() (ok supports structuredContent)
+├── pkg.ts                # JSON-modules import of package.json — sole place {name,version} is read
 ├── tools/
-│   └── greet.ts          # Example tool with safety annotations — copy this pattern
-└── prompts/
-    └── hello.ts          # Example prompt — copy this pattern
+│   └── greet.ts          # Example tool with safety annotations + outputSchema — copy this pattern
+├── prompts/
+│   ├── hello.ts          # Zero-arg prompt example
+│   └── code-review.ts    # Templated prompt with Zod-validated args
+└── resources/
+    └── server-info.ts    # Example resource exposing server metadata
 tests/
+├── config.test.js        # parseConfig environment branches
 ├── greet.test.js         # Tool tests (run against built output in dist/)
-├── helpers.test.js       # Helper tests
-└── hello.test.js         # Prompt tests
+├── helpers.test.js       # ok() / err() unit tests
+├── hello.test.js         # Zero-arg prompt tests
+├── code-review.test.js   # Templated prompt tests
+├── server-info.test.js   # Resource tests
+└── integration/          # End-to-end via SDK in-memory transport + spawned process
+    ├── sdk-contract.test.js
+    └── server-boot.test.js
 ```
 
 ## Adding a New Tool
@@ -34,6 +44,12 @@ tests/
      inputSchema: {
        param: z.string().describe('Parameter description'),
      },
+     // outputSchema makes the handler return `structuredContent` validated
+     // against this shape. REQUIRED by the 2026 MCP spec when declared.
+     // Omit for free-form text-only tools.
+     outputSchema: {
+       result: z.string().describe('Processed value'),
+     },
      annotations: {
        readOnlyHint: true,       // Does not modify anything
        destructiveHint: false,    // Not destructive
@@ -44,7 +60,9 @@ tests/
 
    export async function handler({ param }: { param: string }) {
      try {
-       return ok(`Result: ${param}`);
+       const result = `Result: ${param}`;
+       // Second arg to ok() → structuredContent alongside the text mirror.
+       return ok(result, { result });
      } catch (e) {
        return err(`Failed: ${e instanceof Error ? e.message : String(e)}`);
      }
@@ -137,11 +155,11 @@ Each module exports a `registerXxxTools(server, config)` function called from `i
 - Zod schemas validate tool/prompt inputs at runtime
 - `StdioServerTransport` for CLI/desktop usage (npx)
 - Tests import from `dist/` (built output) — run `npm run build` before testing
-- Use `.js` extensions in TypeScript imports (required for Node16 module resolution)
+- Use `.js` extensions in TypeScript imports (required for `NodeNext` module resolution)
 
 ## Do NOT Modify
 
 - `.github/workflows/` CI/CD pipeline structure
   - **Why**: Version guard, OIDC publishing, and CI gate protect against duplicate releases and untested deploys
-- `tsconfig.json` module settings (`Node16`)
-  - **Why**: Required for ESM + Node.js interop. Changing breaks `.js` extension imports
+- `tsconfig.json` module settings (`NodeNext`)
+  - **Why**: Required for ESM + Node.js interop, JSON-modules (`with { type: 'json' }`), and the mandatory `.js` extension on relative imports. Changing breaks `src/pkg.ts` and every cross-file import.

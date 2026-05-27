@@ -27,7 +27,7 @@ MCP 서버를 만들고, push로 배포하세요. 시크릿 0개.
 **현재 구현됨**
 
 - MCP SDK — `@modelcontextprotocol/sdk` + stdio 트랜스포트
-- TypeScript — Strict 모드, ES2022, Zod 스키마 검증
+- TypeScript — Strict 모드 (`noUncheckedIndexedAccess` + `verbatimModuleSyntax` 포함), ES2023 target, Zod 입출력 스키마 검증
 - Safety annotations — 모든 도구에 readOnly/destructive/idempotent 힌트
 - Prompts — `registerPrompt` 기반 가이드 워크플로우 템플릿 (SDK v1.29+)
 - Resources — 메타데이터 + 핸들러 패턴의 데이터 노출
@@ -90,6 +90,13 @@ export const config = {
   inputSchema: {
     input: z.string().describe('입력 파라미터'),
   },
+  // structured 응답이 필요하면 `outputSchema`를 선언하세요 — 2026 MCP spec은
+  // outputSchema가 선언된 경우 서버가 `structuredContent` (이 스키마로 검증된)
+  // 를 텍스트 미러와 함께 반환할 것을 요구합니다. 자유 텍스트만 돌려주는
+  // tool이면 `outputSchema`는 생략합니다.
+  outputSchema: {
+    result: z.string().describe('처리된 결과'),
+  },
   annotations: {
     readOnlyHint: true,
     destructiveHint: false,
@@ -100,7 +107,10 @@ export const config = {
 
 export async function handler({ input }: { input: string }) {
   try {
-    return ok(`결과: ${input}`);
+    const result = `결과: ${input}`;
+    // structured payload를 `ok()`의 두 번째 인자로 전달하면 `content[]`의
+    // 텍스트 미러 옆에 `structuredContent`로 함께 세팅됩니다.
+    return ok(result, { result });
   } catch (e) {
     return err(`실패: ${e instanceof Error ? e.message : String(e)}`);
   }
