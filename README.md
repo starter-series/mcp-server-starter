@@ -323,7 +323,7 @@ Add to `~/Library/Application Support/Claude/claude_desktop_config.json`:
 3. npm publish with OIDC + provenance
 4. GitHub Release
 
-**Setup:** See [docs/NPM_PUBLISH_SETUP.md](docs/NPM_PUBLISH_SETUP.md)
+**Setup:** See [docs/NPM_PUBLISH_SETUP.md](docs/NPM_PUBLISH_SETUP.md) — trusted publishers configured on/after 2026-05-20 must select **`npm publish`** as an allowed action, or releases fail with an authorization error.
 
 ## Project Structure
 
