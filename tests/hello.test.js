@@ -1,8 +1,14 @@
 import { describe, test, expect } from '@jest/globals';
 import { z } from 'zod';
-import { handler, schema, description } from '../dist/prompts/hello.js';
+import { handler, schema, argsSchema, name, title, description } from '../dist/prompts/hello.js';
 
 describe('hello prompt', () => {
+  test('has registerPrompt-ready metadata', () => {
+    expect(name).toBe('hello');
+    expect(title).toBe('Hello');
+    expect(argsSchema).toBe(schema);
+  });
+
   test('returns English greeting by default', () => {
     const result = handler({});
     expect(result.messages).toHaveLength(1);
@@ -27,7 +33,7 @@ describe('hello prompt', () => {
   });
 
   test('schema accepts supported languages and rejects unknown ones (Zod)', () => {
-    const shape = z.object(schema);
+    const shape = z.object(argsSchema);
     expect(shape.safeParse({}).success).toBe(true);
     expect(shape.safeParse({ language: 'en' }).success).toBe(true);
     expect(shape.safeParse({ language: 'ko' }).success).toBe(true);
