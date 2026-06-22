@@ -265,8 +265,12 @@ app.listen(3000);
 
 ```bash
 npm run build
+npm run smoke:mcp
+npm run pack:check
 npx @modelcontextprotocol/inspector node dist/index.js
 ```
+
+`npm run smoke:mcp`는 컴파일된 `dist/index.js` stdio 엔트리포인트를 MCP SDK 클라이언트로 실행하고 예제 tool, resource, prompt가 실제로 등록되어 호출되는지 확인합니다. `npm run pack:check`는 `npm pack --dry-run --json`을 실행한 뒤 `main`, `exports`, `types`, `bin`, `files`가 모두 패키지에 들어가는지 검증합니다.
 
 ### Claude Desktop
 
@@ -354,6 +358,8 @@ tests/
 | `npm run dev` | tsx로 실행 (빌드 불필요) |
 | `npm run build` | TypeScript 컴파일 |
 | `npm start` | 컴파일된 서버 실행 |
+| `npm run smoke:mcp` | 컴파일된 stdio 서버를 MCP SDK 클라이언트로 호출 |
+| `npm run pack:check` | package entrypoint와 npm tarball 내용 검증 |
 | `npm test` | 빌드 + 테스트 (`pretest`가 자동 빌드) |
 | `npm run lint` | ESLint |
 | `npm run version:patch` | 패치 버전 올리기 |
