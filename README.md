@@ -265,8 +265,12 @@ See the [MCP SDK docs](https://github.com/modelcontextprotocol/typescript-sdk) f
 
 ```bash
 npm run build
+npm run smoke:mcp
+npm run pack:check
 npx @modelcontextprotocol/inspector node dist/index.js
 ```
+
+`npm run smoke:mcp` starts the compiled `dist/index.js` stdio entrypoint through the MCP SDK client, calls the example tool, and checks the registered resource and prompt. `npm run pack:check` runs `npm pack --dry-run --json` and verifies `main`, `exports`, `types`, `bin`, and `files` all point at packed files.
 
 ### Claude Desktop
 
@@ -354,6 +358,8 @@ tests/
 | `npm run dev` | Run with tsx (no build needed) |
 | `npm run build` | Compile TypeScript |
 | `npm start` | Run compiled server |
+| `npm run smoke:mcp` | Start the compiled stdio server and call it through the MCP SDK client |
+| `npm run pack:check` | Verify package entrypoints and npm tarball contents |
 | `npm test` | Build + run tests (`pretest` auto-builds) |
 | `npm run lint` | ESLint |
 | `npm run version:patch` | Bump patch version |
