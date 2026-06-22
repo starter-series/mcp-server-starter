@@ -200,9 +200,9 @@ server.registerResource(yourResource.name, yourResource.uri, yourResource.metada
 ```ts
 import express from 'express';
 import { randomUUID } from 'node:crypto';
-import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import { isInitializeRequest } from '@modelcontextprotocol/sdk/types.js';
+import { createServer } from 'my-mcp-server';
 
 const app = express();
 app.use(express.json());
@@ -232,7 +232,7 @@ app.post('/mcp', async (req, res) => {
     if (id) sessions.delete(id);
   };
 
-  const server = createServer(); // your McpServer factory
+  const server = createServer();
   await server.connect(transport);
   if (transport.sessionId) sessions.set(transport.sessionId, transport);
   await transport.handleRequest(req, res);

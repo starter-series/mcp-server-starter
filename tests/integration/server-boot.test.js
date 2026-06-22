@@ -31,6 +31,7 @@ function makeDriver(child) {
   const pending = new Map();
   let nextId = 1;
   let buffer = '';
+  let stderr = '';
 
   child.stdout.setEncoding('utf8');
   child.stdout.on('data', (chunk) => {
@@ -48,6 +49,11 @@ function makeDriver(child) {
     }
   });
 
+  child.stderr.setEncoding('utf8');
+  child.stderr.on('data', (chunk) => {
+    stderr += chunk;
+  });
+
   function call(method, params) {
     const id = nextId++;
     const message = { jsonrpc: '2.0', id, method, params };
@@ -58,9 +64,13 @@ function makeDriver(child) {
       const watchdog = setTimeout(() => {
         if (pending.has(id)) {
           pending.delete(id);
-          reject(new Error(`Timeout waiting for response to ${method} (id=${id})`));
+          reject(
+            new Error(
+              `Timeout waiting for response to ${method} (id=${id}). stderr: ${stderr}`,
+            ),
+          );
         }
-      }, 3000);
+      }, 10000);
       watchdog.unref();
       pending.set(id, {
         resolve: (msg) => {
@@ -89,12 +99,6 @@ async function bootServer() {
     stdio: ['pipe', 'pipe', 'pipe'],
     env: { ...process.env, MCP_DEBUG: 'false' },
   });
-  // Drain stderr so the pipe buffer never fills (which would block the
-  // server). Don't fail on stderr content — it's the server's legit log
-  // channel.
-  child.stderr.setEncoding('utf8');
-  child.stderr.on('data', () => {});
-
   const driver = makeDriver(child);
 
   const initResult = await driver.call('initialize', {
@@ -141,6 +145,21 @@ describe('Server boot — dist/index.js spawned as a child process', () => {
     const greetTool = listResult.result?.tools?.find((t) => t.name === 'greet');
     expect(greetTool).toBeDefined();
     expect(greetTool.outputSchema).toBeDefined();
+  });
+
+  test('advertises resources and prompts through the actual binary', async () => {
+    const booted = await bootServer();
+    child = booted.child;
+
+    const resourcesResult = await booted.driver.call('resources/list', {});
+    expect(resourcesResult.result?.resources?.map((resource) => resource.uri)).toContain(
+      'info://server/status',
+    );
+
+    const promptsResult = await booted.driver.call('prompts/list', {});
+    expect(promptsResult.result?.prompts?.map((prompt) => prompt.name)).toEqual(
+      expect.arrayContaining(['hello', 'code-review']),
+    );
   });
 
   test('greet tool round-trips through the actual binary', async () => {

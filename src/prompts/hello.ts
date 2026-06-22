@@ -4,11 +4,14 @@ const LANGS = ['en', 'ko', 'ja'] as const;
 type Lang = (typeof LANGS)[number];
 
 export const name = 'hello';
+export const title = 'Hello';
 export const description = 'Generate a friendly greeting message';
 
-export const schema = {
+export const argsSchema = {
   language: z.enum(LANGS).optional().describe('Greeting language. Defaults to English.'),
 };
+
+export const schema = argsSchema;
 
 // `satisfies` (not `Record<string, string>`) keeps key narrowing under noUncheckedIndexedAccess.
 const greetings = {
