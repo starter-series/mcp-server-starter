@@ -61,7 +61,7 @@ MCP 서버를 만들고, push로 배포하세요. 시크릿 0개.
 **[create-starter](https://github.com/starter-series/create-starter) 사용** (권장):
 
 ```bash
-npx @starter-series/create my-mcp-server --template mcp-server
+gh repo create my-mcp-server --template starter-series/mcp-server-starter --clone
 cd my-mcp-server && npm install && npm run dev
 ```
 

@@ -61,7 +61,7 @@ None. Public template.
 **Via [create-starter](https://github.com/starter-series/create-starter)** (recommended):
 
 ```bash
-npx @starter-series/create my-mcp-server --template mcp-server
+gh repo create my-mcp-server --template starter-series/mcp-server-starter --clone
 cd my-mcp-server && npm install && npm run dev
 ```
 
