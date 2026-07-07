@@ -2,13 +2,12 @@
 
 # MCP Server Starter
 
-**TypeScript + OIDC npm Publishing + CI/CD.**
+**TypeScript MCP reference implementation + OIDC npm publish path.**
 
-MCP 서버를 만들고, push로 배포하세요. 시크릿 0개.
+작은 stdio MCP 서버를 tool, resource, prompt, smoke test, package gate까지 갖춘 상태로 시작하세요.
 
 [![CI](https://github.com/starter-series/mcp-server-starter/actions/workflows/ci.yml/badge.svg)](https://github.com/starter-series/mcp-server-starter/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![npm version](https://img.shields.io/npm/v/my-mcp-server.svg)](https://www.npmjs.com/package/my-mcp-server)
 
 [English](README.md) | **한국어**
 
@@ -35,7 +34,7 @@ MCP 서버를 만들고, push로 배포하세요. 시크릿 0개.
 - Config — 환경변수 파싱 패턴
 - CI — gitleaks, npm audit, 라이선스 검사, ESLint, 빌드, 테스트
 - CodeQL — 정적 보안 분석 (push/PR + 주간)
-- CD — OIDC trusted publishing으로 npm 배포 (시크릿 0개)
+- CD — 다운스트림 패키지를 위한 OIDC trusted publishing 경로
 - Dependabot — 의존성 + GitHub Actions 자동 업데이트
 
 **계획됨**
@@ -44,7 +43,7 @@ MCP 서버를 만들고, push로 배포하세요. 시크릿 0개.
 
 **설계 의도**
 
-1분 안에 배포 가능한 MCP 서버를 만들 수 있게 합니다. 로컬 MCP 클라이언트가 전부 stdio를 쓰므로 stdio가 기본값입니다. HTTP 트랜스포트는 인라인 예제로만 보여드리고 (아래 참조) 기본 의존성을 키우지 않습니다. OIDC 배포라 컨트리뷰터가 npm 토큰을 붙여 넣을 일이 없습니다. Tool 이름은 모듈 접두사를 붙여 전역 고유성을 유지합니다 — 서버 간 이름 충돌이 가장 흔한 함정입니다.
+작은 reference MCP 서버를 tool, resource, prompt가 실제 동작하는 상태로 시작하게 합니다. 로컬 MCP 클라이언트가 전부 stdio를 쓰므로 stdio가 기본값입니다. HTTP 트랜스포트는 인라인 예제로만 보여드리고 (아래 참조) 기본 의존성을 키우지 않습니다. OIDC 배포는 템플릿 package 이름과 npm 메타데이터를 바꾼 다운스트림 패키지를 위한 경로입니다. Tool 이름은 모듈 접두사를 붙여 전역 고유성을 유지합니다 — 서버 간 이름 충돌이 가장 흔한 함정입니다.
 
 **비목표**
 
@@ -64,6 +63,8 @@ MCP 서버를 만들고, push로 배포하세요. 시크릿 0개.
 gh repo create my-mcp-server --template starter-series/mcp-server-starter --clone
 cd my-mcp-server && npm install && npm run dev
 ```
+
+배포하기 전에는 placeholder package 이름, 설명, `bin` key를 바꾸셔야 합니다. `package.json`이 템플릿 기본값을 쓰는 동안 `npm publish`는 차단됩니다.
 
 **또는 직접 clone:**
 
@@ -360,6 +361,7 @@ tests/
 | `npm start` | 컴파일된 서버 실행 |
 | `npm run smoke:mcp` | 컴파일된 stdio 서버를 MCP SDK 클라이언트로 호출 |
 | `npm run pack:check` | package entrypoint와 npm tarball 내용 검증 |
+| `npm run template:check` | 템플릿 placeholder가 남아 있으면 publish 차단 |
 | `npm test` | 빌드 + 테스트 (`pretest`가 자동 빌드) |
 | `npm run lint` | ESLint |
 | `npm run version:patch` | 패치 버전 올리기 |

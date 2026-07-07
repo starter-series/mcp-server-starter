@@ -1,4 +1,4 @@
-import packageJson from '../package.json' with { type: 'json' };
+import packageJson from "../package.json" with { type: "json" };
 
 /**
  * Validate the fields we read out of package.json at load time.
@@ -14,16 +14,14 @@ export function assertPackageMeta(pkg: unknown): {
   name: string;
   version: string;
 } {
-  if (typeof pkg !== 'object' || pkg === null) {
-    throw new TypeError('package.json did not parse to an object');
+  if (typeof pkg !== "object" || pkg === null) {
+    throw new TypeError("package.json did not parse to an object");
   }
   const { name, version } = pkg as Record<string, unknown>;
-  if (typeof name !== 'string' || name.length === 0) {
-    throw new TypeError(
-      `package.json "name" must be a non-empty string (got ${typeof name})`,
-    );
+  if (typeof name !== "string" || name.length === 0) {
+    throw new TypeError(`package.json "name" must be a non-empty string (got ${typeof name})`);
   }
-  if (typeof version !== 'string' || version.length === 0) {
+  if (typeof version !== "string" || version.length === 0) {
     throw new TypeError(
       `package.json "version" must be a non-empty string (got ${typeof version})`,
     );

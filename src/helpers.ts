@@ -6,7 +6,7 @@
  * `structuredContent` (required when a tool declares `outputSchema`).
  */
 
-type TextContent = { type: 'text'; text: string };
+type TextContent = { type: "text"; text: string };
 type ToolResponse = {
   content: TextContent[];
   structuredContent?: Record<string, unknown>;
@@ -24,7 +24,7 @@ type ToolResponse = {
  * This helper absorbs both: it always returns a string and never throws.
  */
 function toText(data: unknown): string {
-  if (typeof data === 'string') {
+  if (typeof data === "string") {
     return data;
   }
   try {
@@ -40,17 +40,14 @@ function toText(data: unknown): string {
       // Even String() can throw (e.g. a hostile Symbol.toPrimitive). Last
       // resort: an explicit marker. The contract is "always a string, never
       // throw" — never "round-trippable".
-      return '[unserializable]';
+      return "[unserializable]";
     }
   }
 }
 
-export function ok(
-  data: unknown,
-  structured?: Record<string, unknown>,
-): ToolResponse {
+export function ok(data: unknown, structured?: Record<string, unknown>): ToolResponse {
   const response: ToolResponse = {
-    content: [{ type: 'text', text: toText(data) }],
+    content: [{ type: "text", text: toText(data) }],
   };
   if (structured !== undefined) {
     response.structuredContent = structured;
@@ -60,7 +57,7 @@ export function ok(
 
 export function err(message: string): ToolResponse {
   return {
-    content: [{ type: 'text', text: message }],
+    content: [{ type: "text", text: message }],
     isError: true,
   };
 }

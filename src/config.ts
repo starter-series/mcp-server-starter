@@ -10,6 +10,6 @@ export interface ServerConfig {
 
 export function parseConfig(): ServerConfig {
   return {
-    debug: process.env.MCP_DEBUG === 'true',
+    debug: process.env.MCP_DEBUG === "true",
   };
 }

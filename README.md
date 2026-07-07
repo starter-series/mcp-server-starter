@@ -2,13 +2,12 @@
 
 # MCP Server Starter
 
-**TypeScript + OIDC npm Publishing + CI/CD.**
+**TypeScript MCP reference implementation + OIDC npm publish path.**
 
-Build your MCP server. One-click publish. Zero secrets needed.
+Build a small stdio MCP server with a working tool, resource, prompt, smoke test, and package gate.
 
 [![CI](https://github.com/starter-series/mcp-server-starter/actions/workflows/ci.yml/badge.svg)](https://github.com/starter-series/mcp-server-starter/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![npm version](https://img.shields.io/npm/v/my-mcp-server.svg)](https://www.npmjs.com/package/my-mcp-server)
 
 **English** | [한국어](README.ko.md)
 
@@ -35,7 +34,7 @@ Build your MCP server. One-click publish. Zero secrets needed.
 - Config — Environment variable parsing pattern
 - CI — gitleaks, npm audit, license compliance, ESLint, build, test
 - CodeQL — Static security analysis (push/PR + weekly)
-- CD — OIDC trusted publishing to npm (zero secrets needed)
+- CD — OIDC trusted publishing path for downstream packages
 - Dependabot — Automated dependency + GitHub Actions updates
 
 **Planned**
@@ -44,7 +43,7 @@ Nothing on a public roadmap. The starter is intentionally finished; downstream p
 
 **Design intent**
 
-Bootstrap a publishable MCP server in under a minute. Stdio is the default because every local MCP client speaks it; HTTP transport is shown inline (see below) rather than bundled, to keep the dependency surface minimal. OIDC publishing means contributors never paste an npm token. Globally-unique tool names are enforced by convention — prefix with your module name, since name collisions across servers are the most common foot-gun.
+Bootstrap a small reference MCP server with one working tool, resource, and prompt. Stdio is the default because every local MCP client speaks it; HTTP transport is shown inline (see below) rather than bundled, to keep the dependency surface minimal. OIDC publishing is documented for downstream packages after you replace the template package name and npm metadata. Globally-unique tool names are enforced by convention — prefix with your module name, since name collisions across servers are the most common foot-gun.
 
 **Non-goals**
 
@@ -64,6 +63,8 @@ None. Public template.
 gh repo create my-mcp-server --template starter-series/mcp-server-starter --clone
 cd my-mcp-server && npm install && npm run dev
 ```
+
+Before publishing, replace the placeholder package name, description, and `bin` key. `npm publish` is blocked while `package.json` still uses the template defaults.
 
 **Or clone directly:**
 
@@ -360,6 +361,7 @@ tests/
 | `npm start` | Run compiled server |
 | `npm run smoke:mcp` | Start the compiled stdio server and call it through the MCP SDK client |
 | `npm run pack:check` | Verify package entrypoints and npm tarball contents |
+| `npm run template:check` | Fail publishing while template placeholders remain |
 | `npm test` | Build + run tests (`pretest` auto-builds) |
 | `npm run lint` | ESLint |
 | `npm run version:patch` | Bump patch version |

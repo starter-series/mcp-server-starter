@@ -1,9 +1,9 @@
-import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import * as codeReview from './prompts/code-review.js';
-import * as hello from './prompts/hello.js';
-import { name, version } from './pkg.js';
-import * as serverInfo from './resources/server-info.js';
-import * as greet from './tools/greet.js';
+import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import * as codeReview from "./prompts/code-review.js";
+import * as hello from "./prompts/hello.js";
+import { name, version } from "./pkg.js";
+import * as serverInfo from "./resources/server-info.js";
+import * as greet from "./tools/greet.js";
 
 export function createServer() {
   const server = new McpServer({
