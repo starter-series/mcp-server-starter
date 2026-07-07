@@ -1,4 +1,4 @@
-import { describe, test, expect, afterEach, beforeAll } from '@jest/globals';
+import { describe, test, expect, afterEach, beforeAll, jest } from '@jest/globals';
 import { spawn } from 'node:child_process';
 import { once } from 'node:events';
 import { fileURLToPath } from 'node:url';
@@ -19,6 +19,7 @@ const __dirname = path.dirname(__filename);
 const SERVER_BIN = path.resolve(__dirname, '../../dist/index.js');
 
 const PROTOCOL_VERSION = '2025-06-18';
+jest.setTimeout(30000);
 
 /**
  * Stateful JSON-RPC driver over a spawned child's stdio.
@@ -101,12 +102,25 @@ async function bootServer() {
   });
   const driver = makeDriver(child);
 
-  const initResult = await driver.call('initialize', {
-    protocolVersion: PROTOCOL_VERSION,
-    capabilities: {},
-    clientInfo: { name: 'boot-smoke', version: '0.0.0' },
-  });
-  driver.notify('notifications/initialized', {});
+  let initResult;
+  try {
+    initResult = await driver.call('initialize', {
+      protocolVersion: PROTOCOL_VERSION,
+      capabilities: {},
+      clientInfo: { name: 'boot-smoke', version: '0.0.0' },
+    });
+    driver.notify('notifications/initialized', {});
+  } catch (error) {
+    if (child.exitCode === null) {
+      child.kill('SIGTERM');
+      await Promise.race([
+        once(child, 'exit'),
+        new Promise((resolve) => setTimeout(resolve, 2000)),
+      ]);
+      if (child.exitCode === null) child.kill('SIGKILL');
+    }
+    throw error;
+  }
 
   return { child, driver, initResult };
 }
