@@ -1,0 +1,14 @@
+name: Validate mcp-server-starter
+description: Deliverable-specific checks; runtime and security policy live in starter-series/.github.
+runs:
+  using: composite
+  steps:
+  - name: Lint
+    run: npm run lint
+    shell: bash
+  - name: Build
+    run: npm run build
+    shell: bash
+  - name: Test
+    run: npm test
+    shell: bash

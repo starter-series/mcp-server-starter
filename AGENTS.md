@@ -163,3 +163,11 @@ Each module exports a `registerXxxTools(server, config)` function called from `i
   - **Why**: Version guard, OIDC publishing, and CI gate protect against duplicate releases and untested deploys
 - `tsconfig.json` module settings (`NodeNext`)
   - **Why**: Required for ESM + Node.js interop, JSON-modules (`with { type: 'json' }`), and the mandatory `.js` extension on relative imports. Changing breaks `src/pkg.ts` and every cross-file import.
+
+## Fleet CI policy
+
+Common runtime, audit, license, secret-scan and CodeQL policy lives in
+[starter-series/.github](https://github.com/starter-series/.github).
+Keep deliverable checks in `.github/actions/validate/action.yml`.
+Weekly health and failures are aggregated in the central Fleet maintenance workflow;
+this repository retains a manual maintenance runner without issue automation.
