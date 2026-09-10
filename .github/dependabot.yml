@@ -5,6 +5,10 @@ updates:
     schedule:
       interval: weekly
     open-pull-requests-limit: 10
+    # Match the minimum supported Node runtime; upgrade both in one reviewed change.
+    ignore:
+      - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]
     groups:
       lint:
         patterns: ["eslint", "@eslint/*", "globals", "typescript-eslint"]
